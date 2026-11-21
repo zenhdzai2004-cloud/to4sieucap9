@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>TỔ 4 SIÊU CẤP</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#121e30;--line:#26364d;--text:#edf4ff;--muted:#9fb0c8;--accent:#60a5fa}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#0b1220,#101b2d);color:var(--text);font:16px system-ui,Arial,sans-serif}
+main{max-width:850px;margin:auto;padding:24px 16px 60px}.hero{padding:26px 20px;border:1px solid var(--line);border-radius:22px;background:#121e30}
+h1{margin:0 0 8px;font-size:clamp(28px,7vw,42px)}p{color:var(--muted);line-height:1.5}
+.panel{margin-top:18px;padding:20px;border:1px solid var(--line);border-radius:18px;background:#111c2c}
+input,select,textarea,button{width:100%;padding:13px;margin:7px 0;border-radius:11px;border:1px solid var(--line);background:#0b1524;color:var(--text);font:inherit}
+button{background:#2563eb;border:0;font-weight:700;cursor:pointer}button.secondary{background:#26364d}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hidden{display:none}.muted{font-size:13px;color:var(--muted)}
+.material{padding:14px 0;border-bottom:1px solid var(--line)}.material:last-child{border:0}
+.pill{display:inline-block;color:#bfdbfe;background:#1e3a5f;padding:4px 9px;border-radius:99px;font-size:12px}
+#status{min-height:24px;color:#fbbf24}.adminOnly{display:none}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
+
+.navgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:16px}.navgrid button{margin:0;padding:12px 8px}.toolview{display:none}.toolview.active{display:block}.smallbtn{width:auto;display:inline-block;padding:9px 12px}.lessonitem{padding:12px;border:1px solid var(--line);border-radius:12px;margin:8px 0;background:#0d1929}.lessonitem h3{margin:5px 0}.linkbtn{display:inline-block;color:#93c5fd;text-decoration:none;padding:7px 0}.note{min-height:130px}.timer{font-size:42px;font-weight:800;text-align:center;padding:12px}.timetable td,.timetable th{border:1px solid var(--line);padding:8px;text-align:left}.timetable{width:100%;border-collapse:collapse;font-size:13px}.quizquestion{padding:12px;border:1px solid var(--line);border-radius:12px;margin:8px 0}
+@media(max-width:560px){.navgrid{grid-template-columns:1fr 1fr}.timetable{font-size:11px}}
+</style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <span class="pill">KHO HỌC TẬP • LỚP 9</span>
+    <h1>TỔ 4 SIÊU CẤP</h1>
+    <p>Tài liệu ôn tập và soạn bài nhiều môn học, dành cho thành viên Tổ 4.</p>
+  </section>
+
+  <section class="panel" id="loginPanel">
+    <h2>Đăng nhập quản trị</h2>
+    <p class="muted">Chỉ quản trị viên đăng nhập bằng email và mật khẩu đã tạo trong Supabase.</p>
+    <input id="email" type="email" placeholder="Email quản trị">
+    <input id="password" type="password" placeholder="Mật khẩu" autocomplete="current-password">
+    <button id="loginBtn">Đăng nhập admin</button>
+    <button class="secondary hidden" id="logoutBtn">Đăng xuất</button>
+    <div id="status" role="status"></div>
+  </section>
+
+  <section class="panel" id="memberPanel">
+    <h2>Mã truy cập thành viên</h2>
+    <p class="muted">Nhập mã chung do quản trị viên cung cấp để xem tài liệu.</p>
+    <input id="accessCode" type="password" placeholder="Mã truy cập" autocomplete="off">
+    <button id="accessBtn">Vào kho tài liệu</button>
+  </section>
+
+  <section class="panel hidden" id="materialsPanel">
+    <div class="row" style="align-items:center">
+      <h2 style="margin:0">Kho tài liệu</h2>
+      <select id="subjectFilter" aria-label="Lọc môn học">
+        <option value="">Tất cả môn</option>
+      </select>
+    </div>
+    <div id="materials"></div>
+  </section>
+
+  <section class="panel" id="appPanel">
+    <h2>Tiện ích học tập</h2>
+    <p class="muted">Một số tiện ích chạy trực tiếp trên điện thoại. Ghi chú và thời khóa biểu được lưu trên thiết bị này.</p>
+    <div class="navgrid">
+      <button data-view="catalog">📚 Danh mục bài</button><button data-view="notes">📝 Sổ tay</button>
+      <button data-view="quiz">🧠 Ôn tập nhanh</button><button data-view="timer">⏱️ Pomodoro</button>
+      <button data-view="schedule">📅 Thời khóa biểu</button><button data-view="materials">📖 Kho tài liệu</button>
+    </div>
+  </section>
+  <section class="panel toolview" id="catalogView">
+    <h2>Danh mục môn học lớp 9</h2>
+    <p class="muted">Chọn môn và học kỳ, tìm tên bài. Nút VietJack mở trang tìm kiếm theo bài/môn; link bài cụ thể có thể được admin bổ sung trong kho tài liệu.</p>
+    <select id="catalogSubject"></select><select id="catalogTerm"><option value="1">Học kỳ 1</option><option value="2">Học kỳ 2</option><option value="all">Cả năm</option></select>
+    <input id="catalogSearch" placeholder="Tìm tên bài hoặc chủ đề...">
+    <div id="catalogResults"></div>
+  </section>
+  <section class="panel toolview" id="notesView">
+    <h2>Sổ tay cá nhân</h2><input id="noteTitle" placeholder="Tên ghi chú"><textarea id="noteText" class="note" placeholder="Ghi bài, công thức, điều cần nhớ..."></textarea>
+    <button id="saveNote">Lưu ghi chú trên thiết bị</button><button class="secondary" id="exportNotes">Xuất ghi chú thành tệp .txt</button><div id="notesList"></div>
+  </section>
+  <section class="panel toolview" id="quizView">
+    <h2>Ôn tập nhanh</h2><p class="muted">Tạo bộ câu hỏi tự ôn trên thiết bị. Chưa có câu hỏi mặc định; tự nhập nội dung để tránh đáp án không đúng bài đang học.</p>
+    <input id="quizQ" placeholder="Câu hỏi"><input id="quizA" placeholder="Đáp án đúng"><input id="quizWrong" placeholder="Một đáp án sai (tùy chọn)"><button id="addQuiz">Thêm câu hỏi</button><button class="secondary" id="startQuiz">Bắt đầu ôn</button><div id="quizArea"></div>
+  </section>
+  <section class="panel toolview" id="timerView">
+    <h2>Pomodoro</h2><div class="timer" id="timerDisplay">25:00</div><div class="row"><button id="timerStart">Bắt đầu</button><button class="secondary" id="timerReset">Đặt lại</button></div><select id="timerMode"><option value="25">Học 25 phút</option><option value="5">Nghỉ ngắn 5 phút</option><option value="15">Nghỉ dài 15 phút</option></select><p class="muted" id="timerMessage">Tập trung một việc trong khoảng thời gian đã chọn.</p>
+  </section>
+  <section class="panel toolview" id="scheduleView">
+    <h2>Thời khóa biểu</h2><p class="muted">Nhập lịch cá nhân. Dữ liệu lưu cục bộ trên điện thoại.</p><textarea id="scheduleText" class="note" placeholder="Ví dụ:\nThứ 2: Toán, Văn, Anh...\nThứ 3: ..."></textarea><button id="saveSchedule">Lưu thời khóa biểu</button><button class="secondary" id="exportSchedule">Xuất lịch .txt</button><p id="scheduleSaved"></p>
+  </section>
+  <section class="panel adminOnly" id="adminPanel">
+    <h2>Quản trị nội dung</h2>
+    <h3>Đặt hoặc đổi mã truy cập chung</h3>
+    <input id="newCode" type="password" placeholder="Mã mới (ít nhất 8 ký tự)">
+    <button id="setCodeBtn">Lưu mã truy cập</button>
+    <hr style="border-color:var(--line);margin:22px 0">
+    <h3>Đăng tài liệu</h3>
+    <select id="newSubject">
+      <option>Toán</option><option>Ngữ văn</option><option>Tiếng Anh</option>
+      <option>Khoa học tự nhiên</option><option>Lịch sử và Địa lí</option>
+      <option>Công nghệ</option><option>Giáo dục công dân</option>
+      <option>Tin học</option><option>Âm nhạc</option><option>Mĩ thuật</option>
+      <option>Giáo dục địa phương</option><option>Hoạt động trải nghiệm</option>
+    </select>
+    <input id="newTitle" placeholder="Tên bài / tiêu đề tài liệu">
+    <textarea id="newContent" rows="6" placeholder="Soạn nội dung bài ngay tại đây. Có thể dán link VietJack/nguồn tham khảo; link sẽ tự bấm được."></textarea>
+    <button id="publishBtn">Đăng tài liệu</button>
+    <p class="muted">Thành viên đọc nội dung ngay trên website, không cần Google Docs. Link tham khảo được dán trong nội dung sẽ tự chuyển thành liên kết bấm mở.</p>
+  </section>
+</main>
+
+<script>
+window.addEventListener('error', function(e){
+  if (e.target && e.target.tagName === 'SCRIPT' && e.target.type === 'module') {
+    var s=document.getElementById('status'); if(s) s.textContent='Lỗi tải thư viện đăng nhập. Hãy tải lại trang hoặc thử mạng khác.';
+  }
+}, true);
+</script>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// Thay hai giá trị này bằng Project URL và Publishable key của dự án Supabase.
+const SUPABASE_URL = 'https://dshsyewrbqcvnzjqfrfv.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Wq8ODdyu87iNtPePN-ekYQ_vee4_l_y';
+const configured = SUPABASE_PUBLISHABLE_KEY.startsWith('sb_publishable_') ||
+                   (SUPABASE_PUBLISHABLE_KEY.length > 30 && SUPABASE_PUBLISHABLE_KEY !== 'DAN_PUBLISHABLE_KEY_VAO_DAY');
+const $ = id => document.getElementById(id);
+const status = msg => $('status').textContent = msg;
+let supabase = null;
+let currentMaterials = [];
+
+if (configured) {
+  supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+} else {
+  status('Chưa cấu hình Publishable key. Hãy thêm khóa công khai vào mã nguồn trước khi triển khai.');
+}
+
+function showAdmin(isAdmin) {
+  $('adminPanel').style.display = isAdmin ? 'block' : 'none';
+  $('logoutBtn').classList.toggle('hidden', !isAdmin);
+  $('loginBtn').classList.toggle('hidden', isAdmin);
+}
+async function refreshSession() {
+  if (!supabase) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { showAdmin(false); return; }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+  showAdmin(profile?.role === 'admin');
+}
+$('loginBtn').onclick = async () => {
+  if (!supabase) return;
+  status('Đang đăng nhập...');
+  const { error } = await supabase.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+  if (error) { status('Đăng nhập chưa thành công: ' + error.message); return; }
+  status('Đã đăng nhập.');
+  await refreshSession();
+};
+$('logoutBtn').onclick = async () => {
+  if (!supabase) return;
+  await supabase.auth.signOut(); showAdmin(false); status('Đã đăng xuất.');
+};
+$('accessBtn').onclick = async () => {
+  if (!supabase) return;
+  const code = $('accessCode').value;
+  if (!code) { alert('Nhập mã truy cập trước nhé.'); return; }
+  status('Đang kiểm tra mã...');
+  const { data, error } = await supabase.rpc('get_materials',{p_code:code});
+  if (error) { status('Mã không đúng hoặc hệ thống chưa cấu hình: ' + error.message); return; }
+  currentMaterials = data || [];
+  $('materialsPanel').classList.remove('hidden');
+  renderMaterials();
+  status('Mã hợp lệ. Đã mở kho tài liệu.');
+};
+function renderMaterials() {
+  const filter = $('subjectFilter').value;
+  const items = currentMaterials.filter(x => !filter || x.subject === filter);
+  const subjects = [...new Set(currentMaterials.map(x => x.subject))].sort();
+  $('subjectFilter').innerHTML = '<option value="">Tất cả môn</option>' + subjects.map(s=>`<option>${escapeHtml(s)}</option>`).join('');
+  $('subjectFilter').value = filter;
+  $('materials').innerHTML = items.length ? items.map(m=>`
+    <article class="material"><span class="pill">${escapeHtml(m.subject)}</span>
+    <h3>${escapeHtml(m.title)}</h3><p style="white-space:pre-wrap">${linkifyContent(m.content)}</p>
+    <span class="muted">${new Date(m.created_at).toLocaleString('vi-VN')}</span></article>`).join('') : '<p>Chưa có tài liệu phù hợp.</p>';
+}
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>\"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
+}
+function linkifyContent(value) {
+  const safe = escapeHtml(value);
+  return safe.replace(/(https?:\/\/[^\s<]+)/g, url => {
+    const clean = url.replace(/[.,;!?)]*$/, '');
+    const tail = url.slice(clean.length);
+    return `<a href="${clean}" target="_blank" rel="noopener noreferrer" style="color:#93c5fd;word-break:break-all">${clean}</a>${tail}`;
+  });
+}
+$('subjectFilter').onchange = renderMaterials;
+$('setCodeBtn').onclick = async () => {
+  if (!supabase) return;
+  const code = $('newCode').value;
+  const { error } = await supabase.rpc('set_access_code',{p_code:code});
+  status(error ? 'Không đổi được mã: '+error.message : 'Đã lưu mã truy cập mới.');
+  if (!error) $('newCode').value = '';
+};
+$('publishBtn').onclick = async () => {
+  if (!supabase) return;
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { status('Hãy đăng nhập admin trước.'); return; }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id',session.user.id).maybeSingle();
+  if (profile?.role !== 'admin') { status('Tài khoản này không có quyền admin.'); return; }
+  const subject=$('newSubject').value, title=$('newTitle').value.trim(), content=$('newContent').value.trim();
+  if (!title || !content) { status('Nhập tiêu đề và nội dung trước.'); return; }
+  const { error } = await supabase.from('learning_materials').insert({subject,title,content,created_by:session.user.id});
+  status(error ? 'Đăng chưa thành công: '+error.message : 'Đã đăng tài liệu.');
+  if (!error) { $('newTitle').value=''; $('newContent').value=''; }
+};
+// --- Local study utilities (single-file build) ---
+const subjects = ['Toán','Ngữ văn','Tiếng Anh','Khoa học tự nhiên','Lịch sử và Địa lí','Công nghệ','Giáo dục công dân','Tin học','Âm nhạc','Mĩ thuật','Giáo dục địa phương','Hoạt động trải nghiệm'];
+const catalog = $('catalogSubject');
+catalog.innerHTML = subjects.map(x=>`<option>${escapeHtml(x)}</option>`).join('');
+const catalogViewIds=['catalogView','notesView','quizView','timerView','scheduleView'];
+function showTool(view){catalogViewIds.forEach(id=>$(id).classList.toggle('active',id===view+'View')); if(view==='notes')renderNotes(); if(view==='schedule')loadSchedule(); if(view==='catalog')renderCatalog();}
+document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>showTool(btn.dataset.view)));
+function renderCatalog(){
+ const term=$('catalogTerm').value, query=$('catalogSearch').value.trim();
+ const list=subjects.filter(x=>x.toLowerCase().includes(query.toLowerCase()));
+ $('catalogResults').innerHTML=list.map(sub=>{const q=encodeURIComponent(`${sub} lớp 9 Kết nối tri thức học kỳ ${term==='all'?'1 2':term} bài học`);return `<div class="lessonitem"><span class="pill">${escapeHtml(sub)}</span><h3>${escapeHtml(sub)} • Lớp 9</h3><p>Danh mục tìm kiếm bài học theo sách Kết nối tri thức${term==='all'?' (cả năm)':` • Học kỳ ${term}`}</p><a class="linkbtn" target="_blank" rel="noopener" href="https://www.google.com/search?q=${q}">Tìm bài tham khảo ↗</a> · <a class="linkbtn" target="_blank" rel="noopener" href="https://vietjack.com/search.jsp?query=${q}">Tìm trên VietJack ↗</a></div>`}).join('') || '<p>Không tìm thấy môn phù hợp.</p>';
+}
+$('catalogSubject').onchange=renderCatalog;$('catalogTerm').onchange=renderCatalog;$('catalogSearch').oninput=renderCatalog;renderCatalog();
+function renderNotes(){const notes=JSON.parse(localStorage.getItem('to4_notes')||'[]');$('notesList').innerHTML=notes.map((n,i)=>`<article class="material"><b>${escapeHtml(n.title||'Ghi chú')}</b><p style="white-space:pre-wrap">${escapeHtml(n.text)}</p><button class="secondary" onclick="deleteNote(${i})">Xóa</button></article>`).join('')||'<p class="muted">Chưa có ghi chú.</p>';}
+window.deleteNote=i=>{const a=JSON.parse(localStorage.getItem('to4_notes')||'[]');a.splice(i,1);localStorage.setItem('to4_notes',JSON.stringify(a));renderNotes()};
+$('saveNote').onclick=()=>{const title=$('noteTitle').value.trim(),text=$('noteText').value.trim();if(!text){alert('Nhập nội dung ghi chú trước.');return}const a=JSON.parse(localStorage.getItem('to4_notes')||'[]');a.unshift({title,text,at:new Date().toISOString()});localStorage.setItem('to4_notes',JSON.stringify(a));$('noteTitle').value='';$('noteText').value='';renderNotes();alert('Đã lưu trên thiết bị này.');};
+$('exportNotes').onclick=()=>downloadText('so-tay-to4.txt',JSON.parse(localStorage.getItem('to4_notes')||'[]').map(n=>`${n.title}\n${n.text}`).join('\n\n'));
+let quizItems=JSON.parse(localStorage.getItem('to4_quiz')||'[]');$('addQuiz').onclick=()=>{const q=$('quizQ').value.trim(),a=$('quizA').value.trim(),w=$('quizWrong').value.trim();if(!q||!a){alert('Nhập câu hỏi và đáp án đúng.');return}quizItems.push({q,a,w});localStorage.setItem('to4_quiz',JSON.stringify(quizItems));$('quizQ').value='';$('quizA').value='';$('quizWrong').value='';alert('Đã thêm câu hỏi ôn tập.');};
+$('startQuiz').onclick=()=>{if(!quizItems.length){$('quizArea').innerHTML='<p>Chưa có câu hỏi. Thêm câu hỏi trước nhé.</p>';return}let i=0,score=0;function draw(){if(i>=quizItems.length){$('quizArea').innerHTML=`<h3>Hoàn thành: ${score}/${quizItems.length}</h3><button class="secondary" onclick="location.reload()">Đóng</button>`;return}const item=quizItems[i],opts=[item.a,...(item.w?[item.w]:[])].sort(()=>Math.random()-.5);$('quizArea').innerHTML=`<div class="quizquestion"><b>${i+1}/${quizItems.length}. ${escapeHtml(item.q)}</b>${opts.map(o=>`<button class="secondary quizopt">${escapeHtml(o)}</button>`).join('')}</div>`;document.querySelectorAll('.quizopt').forEach(b=>b.onclick=()=>{if(b.textContent===item.a)score++;i++;draw()})}draw()};
+let timerRemaining=1500,timerInterval=null;function updateTimer(){const m=Math.floor(timerRemaining/60),s=timerRemaining%60;$('timerDisplay').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
+$('timerMode').onchange=()=>{timerRemaining=Number($('timerMode').value)*60;updateTimer();if(timerInterval){clearInterval(timerInterval);timerInterval=null}};
+$('timerStart').onclick=()=>{if(timerInterval){clearInterval(timerInterval);timerInterval=null;$('timerStart').textContent='Tiếp tục';return} $('timerStart').textContent='Tạm dừng';timerInterval=setInterval(()=>{timerRemaining--;updateTimer();if(timerRemaining<=0){clearInterval(timerInterval);timerInterval=null;$('timerStart').textContent='Bắt đầu';$('timerMessage').textContent='Đã hết giờ! Nghỉ một chút hoặc chọn phiên mới.'}},1000)};
+$('timerReset').onclick=()=>{if(timerInterval)clearInterval(timerInterval);timerInterval=null;timerRemaining=Number($('timerMode').value)*60;updateTimer();$('timerStart').textContent='Bắt đầu'};updateTimer();
+function loadSchedule(){$('scheduleText').value=localStorage.getItem('to4_schedule')||'';$('scheduleSaved').textContent='';}
+$('saveSchedule').onclick=()=>{localStorage.setItem('to4_schedule',$('scheduleText').value);$('scheduleSaved').textContent='Đã lưu trên thiết bị này.'};
+$('exportSchedule').onclick=()=>downloadText('thoi-khoa-bieu.txt',$('scheduleText').value);
+function downloadText(name,content){const blob=new Blob([content],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+
+if (supabase) {
+  supabase.auth.onAuthStateChange(()=>setTimeout(refreshSession,0));
+  refreshSession();
+}
+</script>
+</body>
+</html>
